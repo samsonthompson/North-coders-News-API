@@ -1,10 +1,10 @@
-// const app = require('../app')
-// const request = require('supertest')
-// const db = require('../db/connection')
-// const seed = require('../db/seeds/seed')
-// const data = require('../db/data/test-data/index')
+const express = require('express')
+const app = express()
 
-// beforeEach(() => seed(data));
-// afterAll(() => db.end());
+app.use(express.json())
 
-// describe('App', () =
+const { getTopics } = require('./controllers/topics.controllers')
+
+app.get('/api/topics', getTopics)
+
+module.exports = app
