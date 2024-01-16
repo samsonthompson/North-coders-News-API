@@ -7,8 +7,6 @@ const getApiJSON = (req, res, next) => {
     })
     .catch((err) => {
         next(err)
-        /* i can only think that the err might be a 500 err not able to read
-         the json or a 404 if that typed in a weird misspelt /api */
     })
 }
 

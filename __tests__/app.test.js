@@ -41,29 +41,26 @@ afterAll(() => db.end());
         })
     })
 
-    describe('/api/articles', () => {
+    describe('/api/articles/:id', () => {
         it('should get an article by _Id and respond with the corresponding article object with the correct properties', () => {
             return request(app)
             .get('/api/articles/1')
             .expect(200)
             .then(({body}) => {
-                const article = body.article
-                console.log(article)
-                expect(article.length).toEqual(1)
-                article.forEach((element) => {
-                    expect(element).toEqual(
-                        expect.objectContaining({
-                            author: expect.any(String),
-                            title: expect.any(String),
-                            article_id: expect.any(Number),
-                            body: expect.any(String),
-                            topic: expect.any(String),
-                            created_at: expect.any(String),
-                            votes: expect.any(Number),
-                            article_img_url: expect.any(String),
-                        })
-                    )
-                })
+                actualArticle = body.article
+                
+                const expectedArticle = 
+                [{
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 100,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                }]
+                expect(actualArticle).toEqual(expectedArticle) 
             })
         })
         it('should handle a VALID artile_id that doesnt exist with a 404 error', () => {
@@ -75,7 +72,7 @@ afterAll(() => db.end());
             })
 
         })
-        it.only('should handle an INVALID artile_id with the 400 error', () => {
+        it('should handle an INVALID artile_id with the 400 error', () => {
             return request(app)
             .get('/api/articles/banana')
             .expect(400)

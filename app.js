@@ -3,17 +3,19 @@ const app = express()
 
 const { getTopics } = require('./controllers/topics.controllers')
 const { getApiJSON } = require('./controllers/getApiLibrary.controllers')
-const { getArticles } = require('./controllers/getArticles.controllers')
+const { getArticle } = require('./controllers/getArticles.controllers')
+
 
 app.get('/api/topics', getTopics)
 app.get('/api', getApiJSON)
-app.get('/api/articles/:article_id', getArticles)
+app.get('/api/articles/:article_id', getArticle)
+
 
 app.use((err, req, res, next) => {
    
     // console.log(err, '1st err middleware')
 
-    if(err.code === '42703' || err.code === '42601') { // 2nd err.code is for special characters in the ID haven't rigiously checked all possible yet 
+    if (err.code === '42703' || err.code === '42601' || err.code === '22P02') { 
     res.status(400).send({message: 'Invalid request'})
     }
     else if
