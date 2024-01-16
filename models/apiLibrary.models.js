@@ -6,9 +6,6 @@ const fetchApiJSON = () => {
         .then((data) => {
             return JSON.parse(data)
         })
-        .catch((err) => {
-            next(err)
-        })
     }
     
 
