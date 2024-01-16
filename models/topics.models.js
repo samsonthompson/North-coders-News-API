@@ -5,7 +5,4 @@ exports.fetchTopics = () => {
     .then((result) => {
         return result.rows
     })
-    .catch((err) => {
-        next(err)
-    })
 }
