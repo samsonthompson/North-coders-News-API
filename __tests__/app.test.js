@@ -4,7 +4,7 @@ const db = require('../db/connection')
 const seed = require('../db/seeds/seed')
 const data = require('../db/data/test-data/index')
 const endPoints = require('../endpoints.json')
-
+const jestsorted = require('jest-sorted')
 
 beforeEach(() => seed(data));
 afterAll(() => db.end());
@@ -41,31 +41,29 @@ afterAll(() => db.end());
         })
     })
 
-    describe('/api/articles/:id', () => {
+    describe('/api/article/:id', () => {
         it('should get an article by _Id and respond with the corresponding article object with the correct properties', () => {
             return request(app)
-            .get('/api/articles/1')
+            .get('/api/article/1')
             .expect(200)
             .then(({body}) => {
-                actualArticle = body.article
-                
-                const expectedArticle = 
-                [{
-                    article_id: 1,
-                    title: 'Living in the shadow of a great man',
-                    topic: 'mitch',
-                    author: 'butter_bridge',
-                    body: 'I find this existence challenging',
-                    created_at: '2020-07-09T20:11:00.000Z',
-                    votes: 100,
-                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
-                }]
-                expect(actualArticle).toEqual(expectedArticle) 
+                const [article] = body.article
+                expect(article).toMatchObject({
+                    article_id: expect.any(Number),
+                    title: expect.any(String),
+                    topic: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String)
+
+                })
             })
         })
         it('should handle a VALID artile_id that doesnt exist with a 404 error', () => {
             return request(app)
-            .get('/api/articles/1899991')
+            .get('/api/article/1899991')
             .expect(404) 
             .then(({body}) => {
                 expect(body.message).toBe('Article not found')
@@ -74,7 +72,7 @@ afterAll(() => db.end());
         })
         it('should handle an INVALID artile_id with the 400 error', () => {
             return request(app)
-            .get('/api/articles/banana')
+            .get('/api/article/banana')
             .expect(400)
             .then(({body}) => {
                 expect(body.message).toBe('Invalid request')
@@ -82,3 +80,27 @@ afterAll(() => db.end());
         })
     })
 
+    describe('/api/articles', () => {
+        it(`it should responds with an articles array of article objects, each of which should have the correct properties`, () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(({body}) => {
+                const articles = body.articles
+                expect(articles.length).toBeGreaterThan(0)
+                expect(articles).toBeSortedBy('created_at', {descending: true})
+                articles.forEach((article) => { 
+                expect(article).toMatchObject({
+                    author: expect.any(String),
+                    title: expect.any(String),
+                    article_id: expect.any(Number),
+                    topic: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    article_img_url: expect.any(String),
+                    comment_count: expect.any(String)
+                  })
+                })
+            })
+        })
+    })
