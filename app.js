@@ -3,12 +3,14 @@ const app = express()
 
 const { getTopics } = require('./controllers/topics.controllers')
 const { getApiJSON } = require('./controllers/getApiLibrary.controllers')
-const { getArticle } = require('./controllers/getArticles.controllers')
+const { getArticleById } = require('./controllers/getArticlesById.controllers')
+const { getArticles } = require('./controllers/getArticles.controllers')
 
 
 app.get('/api/topics', getTopics)
 app.get('/api', getApiJSON)
-app.get('/api/articles/:article_id', getArticle)
+app.get('/api/article/:article_id', getArticleById)
+app.get('/api/articles', getArticles)
 
 
 app.use((err, req, res, next) => {
