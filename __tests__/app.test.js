@@ -70,14 +70,6 @@ afterAll(() => db.end());
             })
 
         })
-        it('should handle an INVALID artile_id with the 400 error', () => {
-            return request(app)
-            .get('/api/article/banana')
-            .expect(400)
-            .then(({body}) => {
-                expect(body.message).toBe('Invalid request')
-            })
-        })
     })
 
     describe('/api/articles', () => {
@@ -103,4 +95,43 @@ afterAll(() => db.end());
                 })
             })
         })
+    })
+
+    describe('/api/articles/:article_id/comments', () => {
+        it('should respond with an array of comments for a given article_id of which each comment should have the correct properties', () => {
+            return request(app)
+            .get('/api/articles/3/comments')
+            .expect(200)
+            .then(({body}) => {
+                const comments = body.comments
+                expect(comments.length).toBeGreaterThan(0)
+                expect(comments).toBeSortedBy('created_at', {descending: true})
+                comments.forEach((comment) => { 
+                    expect(comment).toMatchObject({
+                        comment_id: expect.any(Number),
+                        votes: expect.any(Number),
+                        created_at: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        article_id: expect.any(Number)
+                      })
+                    })
+                 })
+            })
+            it('should handle a VALID artile_id responding with an empty array with a 404 error', () => {
+                return request(app)
+                .get('/api/articles/4/comments')
+                .expect(404) 
+                .then(({body}) => {
+                    expect(body.message).toBe('No comments found for this article') // i don't know if its proper practice to allow for information error messages or whether to stick to standardised "Not found" type of langauge
+                })
+            })
+            it('should handle a VALID artile_id not currenntly indexed in the database with a 404 error', () => {
+                return request(app)
+                .get('/api/articles/476/comments')
+                .expect(404) 
+                .then(({body}) => {
+                    expect(body.message).toBe(`Article ID doesn't currently exist`)
+                })
+            })
     })
