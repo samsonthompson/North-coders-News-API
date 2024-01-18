@@ -12,11 +12,6 @@ exports.fetchComments = async (id) => {
                                                
 
         await Promise.all([validArticleId, commentsResult])
-
-        if (commentsResult.rows.length === 0) {
-            return Promise.reject({status: 404, message: 'No comments found for this article'})
-        }
-
         return commentsResult.rows
 
        }

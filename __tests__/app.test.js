@@ -5,6 +5,9 @@ const seed = require('../db/seeds/seed')
 const data = require('../db/data/test-data/index')
 const endPoints = require('../endpoints.json')
 const jestsorted = require('jest-sorted')
+const comments = require('../db/data/test-data/comments')
+
+
 
 beforeEach(() => seed(data));
 afterAll(() => db.end());
@@ -113,17 +116,19 @@ afterAll(() => db.end());
                         created_at: expect.any(String),
                         author: expect.any(String),
                         body: expect.any(String),
-                        article_id: expect.any(Number)
+                        article_id: 3
                       })
                     })
                  })
             })
-            it('should handle a VALID artile_id responding with an empty array with a 404 error', () => {
+            it('should respond with a 200 if the articleID is valid but there are no comments', () => {
                 return request(app)
-                .get('/api/articles/4/comments')
-                .expect(404) 
+                .get('/api/articles/2/comments')
+                .expect(200) 
                 .then(({body}) => {
-                    expect(body.message).toBe('No comments found for this article') // i don't know if its proper practice to allow for information error messages or whether to stick to standardised "Not found" type of langauge
+                    const comments = body.comments
+                    expect(comments).toBeInstanceOf(Array)
+                    expect(comments.length).toBe(0)
                 })
             })
             it('should handle a VALID artile_id not currenntly indexed in the database with a 404 error', () => {
@@ -132,6 +137,80 @@ afterAll(() => db.end());
                 .expect(404) 
                 .then(({body}) => {
                     expect(body.message).toBe(`Article ID doesn't currently exist`)
-                })
+                })            
+            })
+            it('should handle an invalid artile_id with a 400 error', () => {
+                return request(app)
+                .get('/api/articles/NOTAVALIDID/comments')
+                .expect(400) 
+                .then(({body}) => {
+                    expect(body.message).toBe(`Invalid request`)
+                })            
             })
     })
+
+    describe('/api/articles/:article_id/comments', () => {
+        it('should add a comment for a specific article, by id, and return an object with correct comment', () => {  
+            const newComment = 
+                { username : 'icellusedkars',
+                 body: 'newcomment' }
+            const idToTest = 4
+
+            return request(app)
+            .post('/api/articles/4/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({body}) => {
+                const comment = body[0]
+                expect(comment).toEqual(
+                expect.objectContaining({
+                    article_id: idToTest,
+                    author: newComment.username,
+                    body: newComment.body,
+                    comment_id: expect.any(Number),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                }))
+            })
+        })
+        it('should send a 400 for an invalid request with no body key', () => {  
+            return request(app)
+            .post('/api/articles/4/comments')
+            .send({ username : 'icellusedkars'})
+            .expect(400)
+            .then(({body}) => {
+             expect(body.message).toBe(`Invalid request, no body key found`)
+                })
+            })
+        it('should send a 404 for an non existent username', () => {  
+            return request(app)
+            .post('/api/articles/4/comments')
+            .send({ username : 'definitelynotausername',
+                    body: 'i got body for days '})
+            .expect(404)
+            .then(({body}) => {
+             expect(body.message).toBe(`Username doesn't currently exist`)
+                })
+            })
+         it('should send a 404 for an non existent article_id', () => {  
+            return request(app)
+            .post('/api/articles/643225/comments')
+            .send({ username : 'icellusedkars',
+                    body: 'i got body for days '})
+            .expect(404)
+            .then(({body}) => {
+             expect(body.message).toBe(`Article ID doesn't currently exist`)
+                })
+            })
+         it('should send a 400 for an INVALID article_id', () => {  
+            return request(app)
+            .post('/api/articles/IAMNOTANID/comments')
+            .send({ username : 'icellusedkars',
+                    body: 'i got body for days '})
+            .expect(400)
+            .then(({body}) => {
+             expect(body.message).toBe(`Invalid request`)
+                })
+            })
+        })
+    
