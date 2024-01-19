@@ -2,11 +2,10 @@ const { insertComment } = require('../models/postComment.model')
 
 exports.postComment = (req, res, next) => {
 
-    const id = req.params.article_id
-    const author = req.body.username
-    const body = req.body.body
+    const { article_id }= req.params
+    const { username, body } = req.body
     
-insertComment(id, author, body)
+insertComment(article_id, username, body)
     .then((data) => {
         res.status(201).send(data.rows)
     })

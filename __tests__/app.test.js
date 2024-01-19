@@ -173,6 +173,31 @@ afterAll(() => db.end());
                 }))
             })
         })
+        it('should add a comment for a specific article, whilst ignoring unnessessary properties and return an object with correct comment', () => {  
+            const newComment = 
+                { username : 'icellusedkars',
+                  body: 'newcomment',
+                  randomAssProperty : `don't add me`}
+            
+                const idToTest = 4
+
+            return request(app)
+            .post('/api/articles/4/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({body}) => {
+                const comment = body[0]
+                expect(comment).toEqual(
+                expect.objectContaining({
+                    article_id: idToTest,
+                    author: newComment.username,
+                    body: newComment.body,
+                    comment_id: expect.any(Number),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                }))
+            })
+        })
         it('should send a 400 for an invalid request with no body key', () => {  
             return request(app)
             .post('/api/articles/4/comments')
@@ -213,4 +238,84 @@ afterAll(() => db.end());
                 })
             })
         })
+
+ describe('/api/articles/:article_id', () => {
+        it('should take a valid article_id and increment the votes property correctly returning the updated article', () => {
+
+            return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 10 })
+            .expect(200)
+            .then(({body}) => {
+                const {article} = body
+                expect(article[0]).toEqual(
+                expect.objectContaining({
+                    article_id: 1,
+                    title: expect.any(String),
+                    author: expect.any(String),
+                    body: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: 110,
+                    article_img_url: expect.any(String)
+                    })
+                )})
+            })
+         it('should take a valid article_id and decrement the votes property correctly returning the updated article', () => {
+
+                return request(app)
+                .patch('/api/articles/1')
+                .send({ inc_votes: -10 })
+                .expect(200)
+                .then(({body}) => {
+                    const {article} = body
+                    expect(article[0]).toEqual(
+                    expect.objectContaining({
+                        article_id: 1,
+                        title: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: 90,
+                        article_img_url: expect.any(String)
+                        })
+                    )})
+                })
+
+        it('should send a 404 for an non existent VALID article_id', () => {
+            return request(app)
+            .patch('/api/articles/64000')
+            .send({ inc_votes: 10 })
+            .expect(404)
+            .then(({body}) => {
+            expect(body.message).toBe(`Article ID doesn't currently exist`)
+            })
+        })
+
+        it('should send a 400 when votes are not provided in the patch', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .expect(400)
+            .then(({body}) => {
+            expect(body.message).toBe(`Invalid request`)
+            })
+        })
     
+        it('should send a 400 for an INVALID article_id', () => {
+            return request(app)
+            .patch('/api/articles/banana')
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(({body}) => {
+            expect(body.message).toBe(`Invalid request`)
+             })
+        })
+        it('should send a 400 for incorrect syntax on the ', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 'ten' })
+            .expect(400)
+            .then(({body}) => {
+            expect(body.message).toBe(`Invalid request`)
+        })
+    })
+})
