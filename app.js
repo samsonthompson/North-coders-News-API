@@ -7,6 +7,7 @@ const { getArticles } = require('./controllers/getArticles.controllers')
 const { getComments } = require('./controllers/getComments.controllers')
 const { postComment } = require('./controllers/postComment.controller')
 const patchArticleById = require('./controllers/patchArticlesById.controllers')
+const { deleteComment } = require('./controllers/deleteComment.controllers')
 
 const app = express()
 
@@ -19,9 +20,10 @@ app.get('/api/articles', getArticles)
 app.get('/api/articles/:article_id/comments', getComments)
 app.post('/api/articles/:article_id/comments', postComment)
 app.patch('/api/articles/:article_id', patchArticleById)
+app.delete('/api/comments/:comment_id', deleteComment)
 
 app.use((err, req, res, next) => {
-    // console.log(err.code, 'manual reject errors middleware')
+    console.log(err.code, 'manual reject errors middleware')
     if (err.status && err.message){
     res.status(err.status).send({ message: err.message })
     }
@@ -31,7 +33,7 @@ app.use((err, req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    // console.log(err.code, 'primary error middleware')
+    console.log(err.code, 'primary error middleware')
     if (err.code === '42703' || err.code === '42601' || err.code === '22P02' || err.code === '23502') 
     { 
     res.status(400).send({message: 'Invalid request'})
@@ -42,7 +44,7 @@ app.use((err, req, res, next) => {
     })
 
 app.use((err, req, res, next) => {
-    // console.log(err.code, 'edgecase error middleware')
+    console.log(err.code, 'edgecase error middleware')
     res.status(500).send({ message: 'Internal server error' })
 })
 

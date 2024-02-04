@@ -319,3 +319,18 @@ afterAll(() => db.end());
         })
     })
 })
+// describe('/api/comments/:comment_id', () => {
+//     it('should delete a comment by comment id and respond with a 204', () => {  
+//         return request(app)
+//         .delete('/api/comments/1')
+//         .expect(204)
+//         })
+//     })
+    // it.only('should respond with a 404 when given a VALID non existent ID', () => {  
+    //     return request(app)
+    //     .delete('/api/comments/999999')
+    //     .expect(404)
+    //     .then(({body}) => {
+    //      expect(body.message).toBe(`Invalid request`)
+    //     })
+    // })
