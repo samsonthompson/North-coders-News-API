@@ -1,4 +1,6 @@
 const express = require('express')
+const CORS = require('cors')
+
 
 const { getTopics } = require('./controllers/topics.controllers')
 const { getApiJSON } = require('./controllers/getApiLibrary.controllers')
@@ -10,7 +12,7 @@ const patchArticleById = require('./controllers/patchArticlesById.controllers')
 const { deleteComment } = require('./controllers/deleteComment.controllers')
 
 const app = express()
-
+app.use(CORS())
 app.use(express.json());
 
 app.get('/api/topics', getTopics)
