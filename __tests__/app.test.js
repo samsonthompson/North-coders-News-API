@@ -6,6 +6,7 @@ const data = require('../db/data/test-data/index')
 const endPoints = require('../endpoints.json')
 const jestsorted = require('jest-sorted')
 const comments = require('../db/data/test-data/comments')
+const { GrAscending } = require('react-icons/gr')
 
 
 
@@ -75,15 +76,15 @@ afterAll(() => db.end());
         })
     })
 
+
     describe('/api/articles', () => {
-        it(`it should responds with an articles array of article objects, each of which should have the correct properties`, () => {
+        it(`should respond with an array of articles with correct data`, () => {
             return request(app)
             .get('/api/articles')
             .expect(200)
             .then(({body}) => {
                 const articles = body.articles
                 expect(articles.length).toBeGreaterThan(0)
-                expect(articles).toBeSortedBy('created_at', {descending: true})
                 articles.forEach((article) => { 
                 expect(article).toMatchObject({
                     author: expect.any(String),
@@ -93,12 +94,114 @@ afterAll(() => db.end());
                     created_at: expect.any(String),
                     votes: expect.any(Number),
                     article_img_url: expect.any(String),
-                    comment_count: expect.any(String)
+                    comment_count: expect.any(Number)
                   })
                 })
             })
         })
-    })
+        it('should respond with an array of articles sorted by topic in descending order', () => {
+            return request(app)
+                .get('/api/articles?sort_by=topic&order=DESC')
+                .expect(200)
+                .then(({ body }) => {
+                    const articles = body.articles;
+                    expect(articles.length).toBeGreaterThan(0);
+                    
+                    expect(articles).toBeSortedBy('topic', { descending: true });
+                    
+                    articles.forEach((article) => {
+                        expect(article).toMatchObject({
+                            author: expect.any(String),
+                            title: expect.any(String),
+                            article_id: expect.any(Number),
+                            topic: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            article_img_url: expect.any(String),
+                            comment_count: expect.any(Number),
+                        });
+                    });
+                });
+        });
+        
+        const sortFields = ["title", "author", "created_at", "comment_count", "topic"];
+        const orders = ["ASC", "DESC"];
+
+        sortFields.forEach((sort_by) => {
+        orders.forEach((order) => {
+        
+        it(`should respond with an array of articles sorted by ${sort_by} in ${order} order`, () => {
+        return request(app)
+          .get(`/api/articles?sort_by=${sort_by}&order=${order}`)
+          .expect(200)
+          .then(({ body }) => {
+            const articles = body.articles;
+            expect(articles.length).toBeGreaterThan(0);
+            
+            expect(articles).toBeSortedBy(sort_by, { descending: order === 'DESC' });
+
+            articles.forEach((article) => {
+              expect(article).toMatchObject({
+                author: expect.any(String),
+                title: expect.any(String),
+                article_id: expect.any(Number),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+                comment_count: expect.any(Number),
+              });
+            });
+          });
+      });
+    });
+  
+
+        it('should respond with an array of articles filtered by topic and sorted by created_at in descending order', () => {
+            return request(app)
+                .get('/api/articles?topic=mitch&sort_by=created_at&order=DESC')
+                .expect(200)
+                .then(({ body }) => {
+                const articles = body.articles;
+                expect(articles.length).toBeGreaterThan(0);
+                expect(articles).toBeSortedBy('created_at', { descending: true });
+                articles.forEach((article) => {
+                    expect(article.topic).toBe('mitch');
+                    expect(article).toMatchObject({
+                        author: expect.any(String),
+                        title: expect.any(String),
+                        article_id: expect.any(Number),
+                        topic: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.any(Number),
+                    });
+                });
+            });
+        });
+    });
+        
+        
+        it('should respond with a 404 if no articles match the given topic', () => {
+            return request(app)
+                .get('/api/articles?topic=nonexistent')
+                .expect(404)
+                .then(({ body }) => {
+                expect(body.message).toBe('No articles found');
+                });
+            });
+
+        it('should respond with a 400 if an invalid sorting order is provided', () => {
+            return request(app)
+                .get('/api/articles?order=INVALID')
+                .expect(400)
+                .then(({ body }) => {
+                expect(body.message).toBe('Invalid sorting order. Please use ASC or DESC.');
+                });
+            });
+        })
+
 
     describe('/api/articles/:article_id/comments', () => {
         it('should respond with an array of comments for a given article_id of which each comment should have the correct properties', () => {
