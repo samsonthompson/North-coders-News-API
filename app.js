@@ -25,17 +25,14 @@ app.patch('/api/articles/:article_id', patchArticleById)
 app.delete('/api/comments/:comment_id', deleteComment)
 
 app.use((err, req, res, next) => {
-    console.log(err.code, 'manual reject errors middleware')
-    if (err.status && err.message){
-    res.status(err.status).send({ message: err.message })
+    if (err.status && err.message) {  
+        res.status(err.status).send({ message: err.message });
+    } else {
+        next(err);
     }
-    else {
-        next(err)
-    }
-})
+});
 
 app.use((err, req, res, next) => {
-    console.log(err.code, 'primary error middleware')
     if (err.code === '42703' || err.code === '42601' || err.code === '22P02' || err.code === '23502') 
     { 
     res.status(400).send({message: 'Invalid request'})
@@ -46,7 +43,6 @@ app.use((err, req, res, next) => {
     })
 
 app.use((err, req, res, next) => {
-    console.log(err.code, 'edgecase error middleware')
     res.status(500).send({ message: 'Internal server error' })
 })
 

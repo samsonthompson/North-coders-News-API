@@ -1,13 +1,12 @@
-const { fetchArticles } = require('../models/getArticles.models')
+const { fetchArticles } = require('../models/getArticles.models');
 
-exports.getArticles = (req, res, next) => {
-    const { topic, order = 'ASC' } = req.query;
-    
-    fetchArticles(topic, order)
-      .then((data) => {
-        res.status(200).send({ articles: data });
-      })
-      .catch((err) => {
-        next(err);
-      });
-  };
+exports.getArticles = async (req, res, next) => {
+  const { topic, sort_by = 'created_at', order = 'DESC' } = req.query;
+
+  try {
+    const articles = await fetchArticles(topic, sort_by, order);
+    res.status(200).send({ articles });
+  } catch (err) {
+    next(err);
+  }
+};
