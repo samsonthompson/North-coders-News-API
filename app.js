@@ -15,6 +15,7 @@ const app = express()
 app.use(CORS())
 app.use(express.json());
 
+
 app.get('/api/topics', getTopics)
 app.get('/api', getApiJSON)
 app.get('/api/article/:article_id', getArticleById)

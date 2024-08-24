@@ -8,7 +8,7 @@ exports.fetchArticles = async (topic, sort_by = "created_at", order = "DESC") =>
   if (!validSortingQueries.includes(sort_by) || !validOrders.includes(order.toUpperCase())) {
     return Promise.reject({
       status: 400,
-      message: "Invalid sorting order. Please use ASC or DESC."
+      message: "Invalid sorting criteria. Please use a valid column name and ASC or DESC order."
     });
   }
 

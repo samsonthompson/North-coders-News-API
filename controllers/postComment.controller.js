@@ -7,6 +7,7 @@ exports.postComment = (req, res, next) => {
     
 insertComment(article_id, username, body)
     .then((data) => {
+        res.status(201).send(data.rows);
         res.status(201).send(data.rows)
     })
     .catch((err) => {
